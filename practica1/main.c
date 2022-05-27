@@ -4,13 +4,16 @@
 
 //BOOL EN C : https://learntutorials.net/es/c/topic/3336/booleano
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <string.h>
 #define bool int
 #define true 1
 #define false 0
-
-#define TAM_MATRIZ 20
-#include <stdio.h>
-#include <stdlib.h>
+#define TAM_MATRIZ 10
+#define TAM_FILA 9
+int matriz[2][2];
 
 struct ListaAdyaNodo
 {
@@ -37,9 +40,9 @@ void setDato(struct Graph *g)
 		int i = 0;
 		for (i = 0; i < g->tam; i++)
 		{
-			// Set vertic node data
+			// Establecer datos de nodos verticales
 			g->nodo[i].dato = i;
-			// Set NULL Value
+			// Establecer valor NULL
 			g->nodo[i].sgte = NULL;
 			g->nodo[i].sgte = NULL;
 		}
@@ -305,12 +308,7 @@ void imprimirMatriz(int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas)
    int fila=0; int columna=0;
 
    llenarArrayAuxs(arrayAux1,arrayAux2,filas,columnas);
-   printf("El 1er array de vertices es:\n");
-   imprimirArray(arrayAux1,filas);
-   printf("\nEl 2do array de vertices es:\n");
-   imprimirArray(arrayAux2,columnas);
 
-  //struct Graph *g = newGraph(nroVertices);
    for(fila=0;fila<filas;fila++){
      for(columna=0;columna<columnas;columna++){
 
@@ -358,71 +356,98 @@ int i=0; int j=0;
     }
 }
 
-int main(){
- /*
- int matriz[3][3];
- inicializarMatrizConCeros(matriz,3,3);
- imprimirMatriz(matriz,3,3);
- //solicitar(int matriz,int filas,int columnas,int proceso,int recurso
- printf("\n p1  s   r1\n");
- solicitar(matriz,3,3,1,1);
- imprimirMatriz(matriz,3,3);
- printf("\n p2  s   r1\n");
- solicitar(matriz,3,3,2,1);
- imprimirMatriz(matriz,3,3);
- printf("\n p1  d   r1\n");
- liberar(matriz,3,3,1,1);
- imprimirMatriz(matriz,3,3);*/
+void readfile(const char *archivo) {
+  char texto[TAM_FILA]; // cadena que lee la primera fila del file.txt
+  char *proc, *ope, *rec; // punteros que capturan el proceso, operacion y recurso separados por espacios
+  char proceso[4];	// cadena que guarda el proceso
+  char operacion;	// caracter que guarda la operacion
+  char recurso[4];	// cadena que guarda el recurso
 
-//Generando un escenario ciclico
-int matriz[2][2];
- inicializarMatrizConCeros(matriz,2,2);
- imprimirMatriz(matriz,2,2);
- //solicitar(int matriz,int filas,int columnas,int proceso,int recurso
- printf("\n p1  s   r1\n");
- solicitar(matriz,2,2,1,1);
- imprimirMatriz(matriz,2,2);
- printf("\n p2  s   r1\n");
- solicitar(matriz,2,2,2,1);
- imprimirMatriz(matriz,2,2);
- printf("\n p2  s   r2\n");
- solicitar(matriz,2,2,2,2);
- imprimirMatriz(matriz,2,2);
- printf("\n p1  s   r2\n");
- solicitar(matriz,2,2,1,2);
- imprimirMatriz(matriz,2,2);
- struct Graph *g1 = newGraph(4);
- convertirMatrizAlistaAdya(g1,matriz,2,2);
- verificarCiclo(g1);
+  int pr, re;
+  //FILE *in = fopen(archivo, "r"); /* Abrimos el archivo para leer. */
+  FILE *in = fopen("escenarioCircular.txt", "r"); /* Abrimos el archivo para leer. */
+  if (!in)
+      printf("No se pudo abrir el archivo.\n"), NULL;
+  int i;
+  int contador=0;
+  char *token;
+  //fgets(char arreglo[], int n, stdinTeclado)'\0' '\n';
 
- /* addEge, checkCycle,detectarCicloConDFS cambio de nombre
- // 6 implies the number of nodes in graph
-	struct Graph *g = newGraph(6);
-	// Connect node with an edge
-	addEdge(g, 0, 1);
-	addEdge(g, 0, 3);
-	addEdge(g, 1, 2);
-	addEdge(g, 2, 5);
-	addEdge(g, 3, 4);
-	addEdge(g, 4, 2);
-	// Test A
-	checkCycle(g);
-	// Add other edge
-	addEdge(g, 5, 1);
-	// Test B
-	checkCycle(g);
-	///////
-	struct Graph *j = newGraph(4);
-	// Connect node with an edge
-	addEdge(j, 0, 2);
-	addEdge(j, 1, 3);
-	addEdge(j, 2, 1);
-	addEdge(j, 3, 0);
+  while(fgets(texto,TAM_FILA,in)){
+ 	strtok(texto,"\n");
+	printf("Instruccion: '%s'\n", texto);
 
-	// Test A
-	checkCycle(j);*/
+	token = strtok(texto," ");
+
+        while(token){
+
+		contador= contador +1;
+		if(contador == 1){
+			proc = token;
+			//printf("proc: '%s'\n", proc);
+			int tam = strlen(proc);;
+			int i;
+			for(i =1; i< tam; i++){
+				proceso[i-1] = proc[i];
+
+			}
+		}else if(contador ==2){
+			ope = token;
+			operacion = ope[0];
 
 
+		}else if(contador ==3){
+			rec = token;
+			int tam = strlen(proc);
+			int i;
+			for(i =1; i< tam; i++){
+				recurso[i-1] = rec[i];
+
+			}
+
+		}
+		//printf("token: '%s'\n", token);
+
+
+		token = strtok(NULL," ");
+
+	}
+	pr = atoi(proceso);
+	re = atoi(recurso);
+	contador =0;
+
+	if(operacion == 's'){
+
+		//printf("LLAMANDO A SOLICITUD: '%c'\n", operacion);
+		solicitar(matriz,2,2,pr,re);
+		imprimirMatriz(matriz,2,2);
+
+	}else if(operacion =='d'){
+		//printf("LLAMANDO A LIBERA: '%c'\n", operacion);
+		liberar(matriz,2,2,pr,re);
+		imprimirMatriz(matriz,2,2);
+	}
+
+  }
+
+  crearGrafoApartirMatriz(matriz,2,2);
+
+  fclose(in);
+
+
+}
+//solo convierte la matriz a lista de adyacencia q seria el grafo y verifica si existe ciclo del grafo ya creado
+void crearGrafoApartirMatriz(int matriz [TAM_MATRIZ][TAM_MATRIZ],int filas,int columnas){
+     int tam=filas*columnas;
+     struct Graph *g1 = newGraph(tam);
+     convertirMatrizAlistaAdya(g1,matriz,filas,columnas);
+     verificarCiclo(g1);
+}
+
+int main(int argc, char *const argv[]){
+     inicializarMatrizConCeros(matriz,2,2);
+     imprimirMatriz(matriz,2,2);
+     readfile(argv[1]);
  return 0;
 
 }

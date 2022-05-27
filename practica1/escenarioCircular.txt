@@ -1,0 +1,5 @@
+p1 s r1
+p2 s r1
+p2 s r2
+p1 s r2
+
