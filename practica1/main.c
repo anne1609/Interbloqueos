@@ -13,8 +13,7 @@
 #define false 0
 #define TAM_MATRIZ 10
 #define TAM_FILA 9
-int matriz[2][2];
-
+int tamanios[40];
 struct ListaAdyaNodo
 {
 	int id;
@@ -341,6 +340,7 @@ void imprimirArray(int array[],int tam){
         printf("%i\t",array[i]);
 
     }
+    printf("\n");
 }
 void buscarVertice(int matriz [TAM_MATRIZ][TAM_MATRIZ],int filas,int columnas,int fila,int columna,int *vert1,int *vert2,int arrayAux1[],int arrayAux2[]){
 int i=0; int j=0;
@@ -355,14 +355,12 @@ int i=0; int j=0;
       }
     }
 }
-
-void readfile(const char *archivo) {
+int readfile(const char *archivo,int indice,int mayor) {
   char texto[TAM_FILA]; // cadena que lee la primera fila del file.txt
   char *proc, *ope, *rec; // punteros que capturan el proceso, operacion y recurso separados por espacios
   char proceso[4];	// cadena que guarda el proceso
   char operacion;	// caracter que guarda la operacion
   char recurso[4];	// cadena que guarda el recurso
-
   int pr, re;
   //FILE *in = fopen(archivo, "r"); /* Abrimos el archivo para leer. */
   FILE *in = fopen("escenarioCircular.txt", "r"); /* Abrimos el archivo para leer. */
@@ -371,11 +369,12 @@ void readfile(const char *archivo) {
   int i;
   int contador=0;
   char *token;
+   llenarArrayConCeros(tamanios);
   //fgets(char arreglo[], int n, stdinTeclado)'\0' '\n';
 
   while(fgets(texto,TAM_FILA,in)){
  	strtok(texto,"\n");
-	printf("Instruccion: '%s'\n", texto);
+	//printf("Instruccion: '%s'\n", texto);
 
 	token = strtok(texto," ");
 
@@ -391,6 +390,7 @@ void readfile(const char *archivo) {
 				proceso[i-1] = proc[i];
 
 			}
+
 		}else if(contador ==2){
 			ope = token;
 			operacion = ope[0];
@@ -419,22 +419,132 @@ void readfile(const char *archivo) {
 	if(operacion == 's'){
 
 		//printf("LLAMANDO A SOLICITUD: '%c'\n", operacion);
-		solicitar(matriz,2,2,pr,re);
-		imprimirMatriz(matriz,2,2);
+		llenarConTamanios(pr,re,tamanios,&indice);
+
+
 
 	}else if(operacion =='d'){
 		//printf("LLAMANDO A LIBERA: '%c'\n", operacion);
-		liberar(matriz,2,2,pr,re);
-		imprimirMatriz(matriz,2,2);
+		llenarConTamanios(pr,re,tamanios,&indice);
+
+
+	}
+
+  }
+  mayorTam(tamanios,&mayor);
+  imprimirArray(tamanios,40);
+
+
+
+  fclose(in);
+  return mayor;
+
+}
+void readfile2(const char *archivo,int tamanio,int matriz[TAM_MATRIZ][TAM_MATRIZ]) {
+  char texto[TAM_FILA]; // cadena que lee la primera fila del file.txt
+  char *proc, *ope, *rec; // punteros que capturan el proceso, operacion y recurso separados por espacios
+  char proceso[4];	// cadena que guarda el proceso
+  char operacion;	// caracter que guarda la operacion
+  char recurso[4];	// cadena que guarda el recurso
+  int pr, re;
+  //FILE *in = fopen(archivo, "r"); /* Abrimos el archivo para leer. */
+  FILE *in = fopen("escenarioCircular.txt", "r"); /* Abrimos el archivo para leer. */
+  if (!in)
+      printf("No se pudo abrir el archivo.\n"), NULL;
+  int i;
+  int contador=0;
+  char *token;
+   llenarArrayConCeros(tamanios);
+  //fgets(char arreglo[], int n, stdinTeclado)'\0' '\n';
+
+  while(fgets(texto,TAM_FILA,in)){
+ 	strtok(texto,"\n");
+	printf("Instruccion: '%s'\n", texto);
+
+	token = strtok(texto," ");
+
+        while(token){
+
+		contador= contador +1;
+		if(contador == 1){
+			proc = token;
+			//printf("proc: '%s'\n", proc);
+			int tam = strlen(proc);;
+			int i;
+			for(i =1; i< tam; i++){
+				proceso[i-1] = proc[i];
+
+			}
+
+		}else if(contador ==2){
+			ope = token;
+			operacion = ope[0];
+
+
+		}else if(contador ==3){
+			rec = token;
+			int tam = strlen(proc);
+			int i;
+			for(i =1; i< tam; i++){
+				recurso[i-1] = rec[i];
+
+			}
+
+		}
+		//printf("token: '%s'\n", token);
+
+
+		token = strtok(NULL," ");
+
+	}
+	pr = atoi(proceso);
+	re = atoi(recurso);
+	contador =0;
+
+	if(operacion == 's'){
+
+		//printf("LLAMANDO A SOLICITUD: '%c'\n", operacion);
+		solicitar(matriz,tamanio,tamanio,pr,re);
+		imprimirMatriz(matriz,tamanio,tamanio);
+
+
+	}else if(operacion =='d'){
+		//printf("LLAMANDO A LIBERA: '%c'\n", operacion);
+		liberar(matriz,tamanio,tamanio,pr,re);
+		imprimirMatriz(matriz,tamanio,tamanio);
+
 	}
 
   }
 
-  crearGrafoApartirMatriz(matriz,2,2);
+  crearGrafoApartirMatriz(matriz,tamanio,tamanio);
 
   fclose(in);
 
 
+}
+void llenarArrayConCeros(int tamanios[]){
+    int i=0;
+    for(i=0;i<40;i++){
+        tamanios[i]==0;
+    }
+}
+void llenarConTamanios(int tamPr,int tamRe,int tamanios[],int *i){
+
+      tamanios[*i]=tamPr;
+      *i=*i+1;
+      tamanios[*i]=tamRe;
+      *i=*i+1;
+
+
+}
+void mayorTam(int tamanios[],int *mayor){
+    for(int i=0;i<40;i++){
+     if(tamanios[i]>*mayor){
+        *mayor=tamanios[i];
+     }
+    }
+    printf("\nEl mayor es:%i\n",*mayor);
 }
 //solo convierte la matriz a lista de adyacencia q seria el grafo y verifica si existe ciclo del grafo ya creado
 void crearGrafoApartirMatriz(int matriz [TAM_MATRIZ][TAM_MATRIZ],int filas,int columnas){
@@ -445,11 +555,12 @@ void crearGrafoApartirMatriz(int matriz [TAM_MATRIZ][TAM_MATRIZ],int filas,int c
 }
 
 int main(int argc, char *const argv[]){
-     inicializarMatrizConCeros(matriz,2,2);
-     imprimirMatriz(matriz,2,2);
-     readfile(argv[1]);
+     int tamanio=0;
+     int matriz[TAM_MATRIZ][TAM_MATRIZ];
+     tamanio=readfile(argv[1],0,0);
+     inicializarMatrizConCeros(matriz,tamanio,tamanio);
+     imprimirMatriz(matriz,tamanio,tamanio);
+     readfile2(argv[1],tamanio, matriz);
  return 0;
 
 }
-
-
