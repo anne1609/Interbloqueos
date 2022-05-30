@@ -1,8 +1,3 @@
-//1ero suponer q funciona siempre con el mismo nro de procesos y mismo nro de recursos, osea q es matriz cuadrada, mismo nro de filas q columnas
-
-//paso de parametros por referencia en C : https://www.youtube.com/watch?v=vahXpd7HlEw
-
-//BOOL EN C : https://learntutorials.net/es/c/topic/3336/booleano
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,6 +9,105 @@
 #define TAM_MATRIZ 10
 #define TAM_FILA 9
 int tamanios[40];
+
+void solicitar(int matrizPesos[TAM_MATRIZ][TAM_MATRIZ],int filas, int columnas,int proceso,int recurso){
+ int columnaArevisar=recurso-1;
+ bool columnaCeros;
+
+ if(columnaArevisar<columnas){
+   columnaCeros=verificarColumnaCeros(matrizPesos,filas, columnaArevisar);
+   if(columnaCeros==true){
+     matrizPesos[proceso-1][recurso-1]=1;
+   }else{
+     matrizPesos[proceso-1][recurso-1]=2;
+   }
+
+
+
+ }else{
+   printf("No es una columna valida, la ejecucion del programa finalizo");
+ }
+
+
+
+}
+
+void liberar(int matrizPesos[TAM_MATRIZ][TAM_MATRIZ],int filas, int columnas,int proceso,int recurso){
+int procesoEspera=0;
+int recursoEspera=recurso-1;
+bool hayEspera=false;
+ if(matrizPesos[proceso-1][recurso-1]==1){
+   matrizPesos[proceso-1][recurso-1]=0;
+   enColumnaHayDos(matrizPesos,&procesoEspera,recursoEspera,&hayEspera,filas);
+   if(hayEspera==true){
+     matrizPesos[procesoEspera][recursoEspera]=1;
+   }
+ }else{
+   printf("No se puede liberar, debido a que el proceso no esta usando un recurso");
+ }
+
+}
+void  enColumnaHayDos(int matriz[TAM_MATRIZ][TAM_MATRIZ], int *fila,int columna,bool *hayEspera, int filas){
+
+     while(*hayEspera==false && *fila<filas){
+      if(matriz[*fila][columna]==2){
+       *hayEspera=true;
+      }
+       *fila=*fila+1;
+     }
+     *fila=*fila-1;
+}
+
+
+
+
+void inicializarMatrizConCeros(int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas){
+  int i,j;
+   for(i=0;i<filas;i++){
+     for(j=0;j<columnas;j++){
+        matriz[i][j]=0;
+     }
+   }
+
+}
+
+bool verificarColumnaCeros(int matriz[TAM_MATRIZ][TAM_MATRIZ],int filas,int columnaArevisar){
+bool respuesta=true;
+  int fila=0;
+
+     while(respuesta==true && fila<filas){
+      if(matriz[fila][columnaArevisar]!=0){
+       respuesta=false;
+      }
+
+       fila++;
+     }
+
+ return respuesta;
+}
+
+
+void imprimirMatriz(int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas){
+  int i,j=0;
+    printf("\n");
+    int k=columnas;
+    while(k<(filas+columnas)){
+       printf("   r%d ",k+1);
+       k++;
+    }
+    printf("\n");
+    for(i=0;i<filas;i++){
+     printf("p%d ",i+1);
+     for(j=0;j<columnas;j++){
+        printf("%i     ",matriz[i][j]);
+     }
+     printf("\n");
+   }
+   printf("\n");
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
 struct ListaAdyaNodo
 {
 	int id;
@@ -117,15 +211,26 @@ void imprimirListaAdyacencia(struct Graph *g)
 		struct ListaAdyaNodo *temp = NULL;
 		for (int i = 0; i < g->tam; i++)
 		{
-			printf("\n Lista de adyacencia del vertice %d  :", i);
+		    if(i<(g->tam/2)){
+			printf("\n Lista de adyacencia del vertice p%d: ", i+1);
+		    }else{
+		        printf("\n Lista de adyacencia del vertice r%d: ", i+1);
+		    }
+
 			temp = g->nodo[i].sgte;
 			while (temp != NULL)
 			{
+			    int k=0;
 			//temp->id son los vértices del nodo del grafo
             //en este caso temp->id es igual que
             //nodo[temp->id].datos
-				printf("  %d", g->nodo[temp->id].dato);
+                if((g->nodo[temp->id].dato)<(g->tam/2)){
+				  printf("p%d", g->nodo[temp->id].dato+1);
+                }else{
+                   printf("r%d", g->nodo[temp->id].dato+1);
+                }
 				temp = temp->sgte;
+				k=k+1;
 			}
 		}
 	}
@@ -135,7 +240,7 @@ void imprimirListaAdyacencia(struct Graph *g)
 	}
 }
 
-//Aca cambie el nombre point por aux
+
 int detectarCicloConDFS(struct Graph *g,
                 int inicio, int aux, int visit[])
 {
@@ -174,7 +279,7 @@ void verificarCiclo(struct Graph *g)
 		printf("Grafo vacio\n");
 		return;
 	}
-	// Imprimir elemento gráfo
+	// Imprimir elemento del gráfo
 	imprimirListaAdyacencia(g);
 	// Esto está almacenando la información sobre
    // Estado del nodo visitante
@@ -196,7 +301,7 @@ void verificarCiclo(struct Graph *g)
 	// Mostrar posible resultado
 	if (resultado == 1)
 	{
-		printf("\n Resultado : Ciclo detectado\n");
+		printf("\n Resultado : Hay ciclo \n");
 	}
 	else
 	{
@@ -206,98 +311,8 @@ void verificarCiclo(struct Graph *g)
 
 
 
-///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-void solicitar(int matrizPesos[TAM_MATRIZ][TAM_MATRIZ],int filas, int columnas,int proceso,int recurso){
- int columnaArevisar=recurso-1;
- bool columnaCeros;
-
- if(columnaArevisar<columnas){
-   columnaCeros=verificarColumnaCeros(matrizPesos,filas, columnaArevisar);
-   if(columnaCeros==true){
-     matrizPesos[proceso-1][recurso-1]=1;
-   }else{
-     matrizPesos[proceso-1][recurso-1]=2;
-   }
-
-
-
- }else{
-   printf("No es una columna valida, la ejecucion del programa finalizo");
- }
-
-
-
-}
-
-void liberar(int matrizPesos[TAM_MATRIZ][TAM_MATRIZ],int filas, int columnas,int proceso,int recurso){
-int procesoEspera=0;
-int recursoEspera=recurso-1;
-bool hayEspera=false;
- if(matrizPesos[proceso-1][recurso-1]==1){
-   matrizPesos[proceso-1][recurso-1]=0;
-   enColumnaHayDos(matrizPesos,&procesoEspera,recursoEspera,&hayEspera,filas);
-   if(hayEspera==true){
-     matrizPesos[procesoEspera][recursoEspera]=1;
-   }
- }else{
-   printf("No se puede liberar, debido a que el proceso no esta usando un recurso");
- }
-
-}
-void  enColumnaHayDos(int matriz[TAM_MATRIZ][TAM_MATRIZ], int *fila,int columna,bool *hayEspera, int filas){
-
-     while(*hayEspera==false && *fila<filas){
-      if(matriz[*fila][columna]==2){
-       *hayEspera=true;
-      }
-       //cuando ponia *fila++, no funcionaba, cuando es con puntero "*", no funciona ++ o --
-       *fila=*fila+1;
-     }
-     *fila=*fila-1;
-}
-
-
-
-
-void inicializarMatrizConCeros(int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas){
-  int i,j;
-   for(i=0;i<filas;i++){
-     for(j=0;j<columnas;j++){
-        matriz[i][j]=0;
-     }
-   }
-
-}
-
-bool verificarColumnaCeros(int matriz[TAM_MATRIZ][TAM_MATRIZ],int filas,int columnaArevisar){
-bool respuesta=true;
-  int fila=0;
-
-     while(respuesta==true && fila<filas){
-      if(matriz[fila][columnaArevisar]!=0){
-       respuesta=false;
-      }
-
-       fila++;
-     }
-
- return respuesta;
-}
-
-
-void imprimirMatriz(int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas){
-  int i,j=0;
-    for(i=0;i<filas;i++){
-     for(j=0;j<columnas;j++){
-        printf("%i",matriz[i][j]);
-     }
-     printf("\n");
-   }
-   printf("\n");
-}
 
  void convertirMatrizAlistaAdya(struct Graph *g,int matriz[TAM_MATRIZ][TAM_MATRIZ], int filas, int columnas){
    int nroVertices=filas*columnas;
@@ -418,23 +433,16 @@ int readfile(const char *archivo,int indice,int mayor) {
 
 	if(operacion == 's'){
 
-		//printf("LLAMANDO A SOLICITUD: '%c'\n", operacion);
 		llenarConTamanios(pr,re,tamanios,&indice);
-
-
 
 	}else if(operacion =='d'){
-		//printf("LLAMANDO A LIBERA: '%c'\n", operacion);
-		llenarConTamanios(pr,re,tamanios,&indice);
 
+		llenarConTamanios(pr,re,tamanios,&indice);
 
 	}
 
   }
   mayorTam(tamanios,&mayor);
-  imprimirArray(tamanios,40);
-
-
 
   fclose(in);
   return mayor;
@@ -544,11 +552,10 @@ void mayorTam(int tamanios[],int *mayor){
         *mayor=tamanios[i];
      }
     }
-    printf("\nEl mayor es:%i\n",*mayor);
 }
 //solo convierte la matriz a lista de adyacencia q seria el grafo y verifica si existe ciclo del grafo ya creado
 void crearGrafoApartirMatriz(int matriz [TAM_MATRIZ][TAM_MATRIZ],int filas,int columnas){
-     int tam=filas*columnas;
+     int tam=filas+columnas;
      struct Graph *g1 = newGraph(tam);
      convertirMatrizAlistaAdya(g1,matriz,filas,columnas);
      verificarCiclo(g1);
