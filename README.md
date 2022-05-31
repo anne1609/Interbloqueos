@@ -12,4 +12,5 @@ Esta es una aplicacion de consola escrito en lenguaje C, que permite mostrar una
 ##  IDE
 Se uso Codeblocks, version 20.03
 
-
+##Sistema Operativo
+Windows 11
